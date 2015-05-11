@@ -1,0 +1,38 @@
+{
+  "name": "superagent-d2l-cors-proxy",
+  "version": "0.0.1",
+  "description": "Plugin for superagent to proxy CORS requests to the Brightspace CDN for legacy IE",
+  "main": "index.js",
+  "scripts": {
+    "lint": "npm run lint:src && npm run lint:test",
+    "lint:src": "jshint index.js",
+    "lint:test": "jshint test/*.js",
+    "test:unit": "istanbul cover _mocha test/*.js -- -R spec",
+    "test": "npm run lint && npm run test:unit",
+    "report-coverage": "coveralls < ./coverage/lcov.info"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Brightspace/superagent-d2l-cors-proxy.git"
+  },
+  "keywords": [
+    "superagent",
+    "frau",
+    "d2l",
+    "cors"
+  ],
+  "author": "D2L Corporation",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/Brightspace/superagent-d2l-cors-proxy/issues"
+  },
+  "homepage": "https://github.com/Brightspace/superagent-d2l-cors-proxy",
+  "devDependencies": {
+    "chai": "^2.3.0",
+    "coveralls": "^2.11.2",
+    "istanbul": "^0.3.13",
+    "jshint": "^2.7.0",
+    "mocha": "^2.2.4",
+    "sinon": "^1.14.1"
+  }
+}
