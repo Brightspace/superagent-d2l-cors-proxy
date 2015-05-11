@@ -3,3 +3,11 @@ node_js:
 - '0.12'
 after_success:
 - npm run report-coverage
+deploy:
+  provider: npm
+  email: d2ltravisdeploy@d2l.com
+  api_key:
+    secure: R7BUxjHHXImqJgDnS+whRRbcMvglYcjPgbsZaNw3pFtaJ2Wm4rYbY1g20llyJql0gc2RLx4iYCx0AxN/xjfjomghth2Yd+iOvMPqNciP/I9FPVXL6PnTWAOpKvWZ0EMIPOogS+GYlB2u39lmB5rPCHvUuIZLUshAcI2UzX7zfDNqodOX2Wqc4ox6h4yPbe37D4YrLH06AQcSw13hRNjNv98naZOmvpZNg7ohUDgvziHQawi7aQcVGAhH+UMQ6ENTi8KMJsH/12BAzpeID1pjIr7zP1S1AVmmBxDucCwMJZQGAyL0MSaY1628g8wzy094u7xkXEsXpSzXH2dujPn43ecJqDgmd+kGo8Wytjlb1h7f2I3/YdhEe8SGTMlrt48L0kZhMIvCoB2jhVRjpTw2+Ef+QVFSjRSCPbBEGOslpzWHGTvZAu+wtLIDc+KGpXsJbTdZV85CLLaiLsBOMQvh6cKUQbblsHlT16e9BPKqBxRKEyMnpHrKVvONO6bvWLhj0323l6/qiV8fVJA0rf2qB67OnJQrW1GzHNo2NvFC+MM7B4YGF8Q3Vh0ROVgSK7TTR5h1MSVKgpiqJVxorC6TdZjaPxWldj83ewuI8yZgrUqCsXLU+QkauZiX4STy9G4Vi+z65BFaIo8mdqgo+GtSKs6aqVbJJO6Yeq2FQ+hls4o=
+  on:
+    tags: true
+    repo: Brightspace/superagent-d2l-cors-proxy
