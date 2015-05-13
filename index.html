@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CORS proxy</title>
+	</head>
+	<body>
+		<script src="https://s.brightspace.com/lib/superagent/1.2.0/superagent.min.js"></script>
+		<script>
+
+			window.addEventListener('message', function(evt) {
+				var data = JSON.parse(evt.data);
+				superagent(data.method, data.url)
+					.query(data.query)
+					.timeout(data.timeout)
+					.send(data.data)
+					.set(data.header)
+					.end(function(err, res) {
+						parent.postMessage(
+							JSON.stringify({
+								id: data.id,
+								err: err,
+								res: res
+							}),
+							'*'
+						);
+					});
+			});
+
+			if(window.parent !== window) {
+				window.parent.postMessage(
+					JSON.stringify({type: 'ready'}),
+					'*'
+				);
+			}
+
+		</script>
+	</body>
+</html>

@@ -5,23 +5,18 @@
 [![Coverage Status][coverage-image]][coverage-url]
 [![Dependency Status][dependencies-image]][dependencies-url]
 
-Plugin for [superagent](https://github.com/visionmedia/superagent) for Brightspace free-range applications which will proxy cross-origin requests to the Brightspace CDN, allowing  [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) for browsers which don't support it.
+Plugin for [superagent](https://github.com/visionmedia/superagent) which will proxy cross-origin requests ([CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)) for browsers which don't support them.
 
 ##Why
-Older versions of IE -- specifically IE8 and IE9 -- do not support making  cross-origin requests using the standard [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) object. Instead, they rely on the non-standard, proprietary [XDomainRequest](https://developer.mozilla.org/en-US/docs/Web/API/XDomainRequest).
+Older versions of IE (specifically IE8 and IE9) do not support making  cross-origin requests using the standard [XMLHttpRequest](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest) object. Instead, they rely on the non-standard, proprietary [XDomainRequest](https://developer.mozilla.org/en-US/docs/Web/API/XDomainRequest).
 
-Not only does superagent [not support the XDomainRequest](https://github.com/visionmedia/superagent/issues/409) object, but XDomainRequest also has [many restrictions](http://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx) which are not imposed normally when using CORS. There [are plugins for superagent](https://github.com/trevorreeves/superagent-legacyIESupport) which add support for the XDomainRequest object, but the restrictions still apply.
+Quite reasonably, superagent does [not support the XDomainRequest](https://github.com/visionmedia/superagent/issues/409) object. Also, XDomainRequest also [has a bunch of restrictions](http://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx) which are not imposed normally when using CORS. There [are plugins for superagent](https://github.com/trevorreeves/superagent-legacyIESupport) which add support for the XDomainRequest object, but the restrictions still apply.
 
-So we need a better way to make cross-origin requests to the Brightspace CDN in all browsers.
+So we need a better way to make cross-origin requests in all browsers.
 
-##How
+##How it works
 
-Instead of making the request cross-origin, this plugin will proxy the request through Brightspace. For security and performance reasons, the proxy will **only** occur if:
-
-* The browser being used doesn't natively support CORS (IE8 and IE9)
-* The request target is the Brightspace CDN
-* The request scheme is HTTP or HTTPS
-* The request method is GET
+If no CORS support is detected, this plugin will proxy the request through an IFRAME pointing at a HTML document on the destination host using [postMessage](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage). Since CORS doesn't apply to the document on the host, it can complete the actual request without limitations.
 
 ##Usage
 
@@ -31,17 +26,25 @@ First, download via NPM:
 npm install superagent-d2l-cors-proxy
 ```
 
-Then simply `use` it with any requests you're making to the Brightspace CDN with superagent:
+Upload the provided `index.html` file to your destination host at `http://myhost.com/lib/d2l-cors-proxy/0.0.1/`.
+
+In your application, `require()` the library, passing it a reference to `superagent`:
 
 ```javascript
 var request = require('superagent'),
-	proxy = require('superagent-d2l-cors-proxy');
+var corsProxy = require('superagent-d2l-cors-proxy')(request);
+```
 
+Then `use()` the proxy with any requests you're making to the destination host with superagent:
+
+```javascript
 request
-	.get('https://s.brightspace.com/myApp/myFile.json')
-	.use(proxy)
+	.get('http://myHost.com/myApp/myFile.json')
+	.use(corsProxy)
 	.end(...);
 ```
+
+**Important**: when making requests to other hosts that shouldn't be proxied, simply omit the `use(corsProxy)` from the superagent call.
 
 ## Contributing
 Contributions are welcome, please submit a pull request!
