@@ -84,7 +84,7 @@ function buildFrame(host) {
 		iframe = document.createElement('iframe');
 		iframe.id = 'd2l-cors-proxy';
 		iframe.setAttribute('style', 'display:none;');
-		iframe.src = host + '/lib/d2l-cors-proxy/' + version + '/';
+		iframe.src = host + '/lib/superagent-d2l-cors-proxy/' + version + '/';
 		document.body.appendChild(iframe);
 	}
 }
