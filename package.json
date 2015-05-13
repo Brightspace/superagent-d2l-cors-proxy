@@ -1,7 +1,7 @@
 {
   "name": "superagent-d2l-cors-proxy",
-  "version": "0.0.1",
-  "description": "Plugin for superagent to proxy CORS requests to the Brightspace CDN for legacy IE",
+  "version": "0.0.2",
+  "description": "Plugin for superagent which will proxy cross-origin requests for browsers which don't support them",
   "main": "index.js",
   "scripts": {
     "lint": "npm run lint:src && npm run lint:test",
@@ -33,6 +33,8 @@
     "istanbul": "^0.3.13",
     "jshint": "^2.7.0",
     "mocha": "^2.2.4",
-    "sinon": "^1.14.1"
+    "nock": "^2.0.1",
+    "sinon": "^1.14.1",
+    "superagent": "^1.2.0"
   }
 }
