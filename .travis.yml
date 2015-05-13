@@ -3,6 +3,7 @@ node_js:
 - '0.12'
 after_success:
 - npm run report-coverage
+- '[ "$TRAVIS_TAG" != "" ] && npm run publish'
 deploy:
   provider: npm
   email: d2ltravisdeploy@d2l.com
@@ -11,3 +12,6 @@ deploy:
   on:
     tags: true
     repo: Brightspace/superagent-d2l-cors-proxy
+env:
+  global:
+    secure: m3QDtbYZGiMrWRtPUTwaEox2aDEXV83XFxDO9s+0aMiGUuNKru5Xs12Gi7mQ9AXeJHkHdmZFJonjuk1/TyYTJneq+fupvrSO0ZrXvoT4lJN4dH99FRKR2OtovtBZnfzlQ1BRlg639yoaqIOKTKjccRu8r0lf+NbG1r8Ls6ngVfZkrz2R5H1yDFKP359ynUxMALcMgRl3naseb2Z/9nXpUs0Z3E4wDhXt3W8ixMnOiF8ONMNOC+82roWrzWMI6GVyKHTv661jzogERcC82TMg4XBA7ubEfa4pqtxHEbUrmc8CP9UNEdJ0VNYtPB0uWEounpYCkRJ0eUWAf1zTK+/CfiOqKITTnJ0zF0ryDzu0LNPCykrSmqRH8f4oVp+sPgbivWGSeZsh2crPe7CjjtDT0/vXWX3bkQ0OCikPlz+SUTUZIlasBU2//tGPxS3JkiNEkpN4JcZpG3tGHJSP2paN0bVv9tSVaFDSbQB36OW2lbZb3ho6cWuyhsYZ5bm3s5eABII11F87r6q8m19OqSRRsGvVn9asTPdODtD8zA52RO0u5cTebyCQSu9MGevBTFK0MIqlMwEY7Vd8xD2UVwxs/coKQPcatXPTe3l6CFStFMbiHkC4mcaiJiSNAP/73Fu7CjpZoZ1x1N6RErydB/yNliYIhfMt+8pZJ3p6XvRdgGE=
