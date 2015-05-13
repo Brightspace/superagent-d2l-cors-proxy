@@ -84,7 +84,7 @@ function buildFrame(host) {
 		iframe = document.createElement('iframe');
 		iframe.id = 'd2l-cors-proxy';
 		iframe.setAttribute('style', 'display:none;');
-		iframe.src = host + '/lib/superagent-d2l-cors-proxy/' + version + '/';
+		iframe.src = host + '/lib/superagent-d2l-cors-proxy/' + version + '/index.html';
 		document.body.appendChild(iframe);
 	}
 }
@@ -141,6 +141,6 @@ module.exports.getProxyFilePath = function() {
 	return __dirname + '/index.html';
 };
 module.exports.getProxyDefaultLocation = function() {
-	return '/lib/superagent-d2l-cors-proxy/' + version + '/';
+	return '/lib/superagent-d2l-cors-proxy/' + version + '/index.html';
 };
 module.exports._tryGetHost = tryGetHost;
