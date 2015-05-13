@@ -141,6 +141,6 @@ module.exports.getProxyFilePath = function() {
 	return __dirname + '/index.html';
 };
 module.exports.getProxyDefaultLocation = function() {
-	return '/lib/d2l-cors-proxy/' + version + '/';
+	return '/lib/superagent-d2l-cors-proxy/' + version + '/';
 };
 module.exports._tryGetHost = tryGetHost;
