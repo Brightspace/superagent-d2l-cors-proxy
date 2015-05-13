@@ -37,6 +37,7 @@
     "jshint": "^2.7.0",
     "mocha": "^2.2.4",
     "nock": "^2.0.1",
+    "peanut-gallery", "^1.0.0",
     "sinon": "^1.14.1",
     "superagent": "^1.2.0"
   }
