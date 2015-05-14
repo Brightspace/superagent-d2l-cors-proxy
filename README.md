@@ -26,7 +26,7 @@ First, download via NPM:
 npm install superagent-d2l-cors-proxy
 ```
 
-Upload the provided `index.html` file to your destination host at `http://myhost.com/lib/d2l-cors-proxy/{version}/index.html`.
+Upload the provided `index.html` file to your destination host at `http://myhost.com/lib/superagent-d2l-cors-proxy/{version}/index.html`.
 
 In your application, `require()` the library, passing it a reference to `superagent`:
 
