@@ -39,7 +39,8 @@ describe('superagent-d2l-cors-proxy', function() {
 			undefined,
 			'',
 			'foo.html',
-			'/foo.ca'
+			'/foo.ca',
+			'//host.com'
 		].forEach(function(url) {
 			it('should fail with no protocol: ' + url, function() {
 				var host = corsProxy._tryGetHost(url);
@@ -47,7 +48,7 @@ describe('superagent-d2l-cors-proxy', function() {
 			});
 		});
 
-		['//', 'http://', 'https://'].forEach(function(protocol) {
+		['http://', 'https://'].forEach(function(protocol) {
 			[
 				'host.com',
 				'host.com/',
