@@ -1,56 +1,6 @@
 'use strict';
 
-var requests = {};
-var queuedRequests = [];
-var ready = false;
-var id = 0;
-var iframe = null;
 var version = require('./package.json').version;
-
-function send(msg) {
-
-	requests[msg.id] = msg;
-
-	if(!ready) {
-		queuedRequests.push(msg.id);
-		return;
-	}
-
-	iframe.contentWindow.postMessage(
-		JSON.stringify(msg),
-		'*'
-	);
-
-}
-
-function sendQueuedRequests() {
-	queuedRequests.forEach(function(id) {
-		send(requests[id]);
-	});
-	queuedRequests = [];
-}
-
-function onMessage(evt) {
-
-	if(evt.source !== iframe.contentWindow) {
-		return;
-	}
-
-	var data = JSON.parse(evt.data);
-
-	if(data.type === 'ready') {
-		ready = true;
-		sendQueuedRequests();
-		return;
-	}
-
-	var r = requests[data.id];
-	if(r) {
-		r._this.callback.call(r._this, data.err, data.res);
-		delete requests[data.id];
-	}
-
-}
 
 function tryGetHost(url) {
 
@@ -79,44 +29,72 @@ function tryGetHost(url) {
 }
 
 function buildFrame(host) {
-	iframe = document.getElementById('d2l-cors-proxy');
-	if(iframe === null ) {
-		iframe = document.createElement('iframe');
-		iframe.id = 'd2l-cors-proxy';
-		iframe.setAttribute('style', 'display:none;');
-		iframe.src = host + '/lib/superagent-d2l-cors-proxy/' + version + '/index.html';
-		document.body.appendChild(iframe);
-	}
+	var iframe = document.createElement('iframe');
+	iframe.setAttribute('style', 'display:none;');
+	iframe.src = host + '/lib/superagent-d2l-cors-proxy/' + version + '/index.html';
+	document.body.appendChild(iframe);
+	return iframe;
 }
 
-module.exports = function(superagent) {
+module.exports = function(req) {
 
 	// CORS feature detection:
 	// http://stackoverflow.com/questions/1641507/detect-browser-support-for-cross-domain-xmlhttprequests
 	// https://hacks.mozilla.org/2009/07/cross-site-xmlhttprequest-with-cors/
 	var supportsCors = 'withCredentials' in new XMLHttpRequest();
 	if(supportsCors) {
-		return function(req) {
-			return req;
-		};
+		return req;
 	}
 
-	var oldEnd = superagent.Request.prototype.end;
+	var host = tryGetHost(req.url);
+	if(!host) {
+		return req;
+	}
 
-	superagent.Request.prototype.end = function(fn) {
+	var callback,
+		iframe,
+		msg,
+		ready = false;
 
-		var host = tryGetHost(this.url);
-		if(!this._d2lCorsProxy || !host) {
-			oldEnd.apply(this, arguments);
-			return this;
+	function onMessage(evt) {
+
+		if(!iframe || evt.source !== iframe.contentWindow) {
+			return;
 		}
 
-		buildFrame(host);
+		var data = JSON.parse(evt.data);
 
-		this._callback = fn || function(){};
+		if(data.type === 'ready') {
+			ready = true;
+			send();
+			return;
+		}
 
-		var msg = {
-			id: ++id,
+		callback.call(msg._this, data.err, data.res);
+		window.removeEventListener('message', onMessage);
+		iframe.parentNode.removeChild(iframe);
+
+	}
+
+	function send() {
+		if(!ready) {
+			return;
+		}
+		iframe.contentWindow.postMessage(
+			JSON.stringify(msg),
+			'*'
+		);
+	}
+
+	req.end = function(fn) {
+
+		window.addEventListener('message', onMessage);
+
+		iframe = buildFrame(host);
+
+		callback = fn || function(){};
+
+		msg = {
 			method: this.method,
 			url: this.url,
 			query: this._query,
@@ -125,16 +103,11 @@ module.exports = function(superagent) {
 			header: this.header,
 			_this: this
 		};
-		send(msg);
+		send();
 
 	};
 
-	window.addEventListener('message', onMessage);
-
-	return function(req) {
-		req._d2lCorsProxy = true;
-		return req;
-	};
+	return req;
 
 };
 module.exports.getProxyFilePath = function() {

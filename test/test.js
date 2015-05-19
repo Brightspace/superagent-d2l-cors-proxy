@@ -1,21 +1,19 @@
 'use strict';
 
-var expect = require('chai').expect,
+var corsProxy = require('../'),
+	expect = require('chai').expect,
 	nock = require('nock'),
-	proxy = require('../'),
 	superagent = require('superagent'),
 	sinon = require('sinon');
 
 var cdnFile = 'https://s.brightspace.com/test/test.txt';
-var end = superagent.Request.prototype.end;
 
-var lastId = -1;
 var iframeStub = {
 	contentWindow: {
-		postMessage: function(msgStr) {
-			var msg = JSON.parse(msgStr);
-			lastId = msg.id;
-		}
+		postMessage: function() {}
+	},
+	parentNode: {
+		removeChild: function() {}
 	},
 	setAttribute: function() {}
 };
@@ -24,6 +22,7 @@ function MockXmlHttpRequest() { this.withCredentials = true; }
 function MockIEXmlHttpRequest() {}
 
 function createMessage(msg, source) {
+	msg = msg || {};
 	source = source || iframeStub.contentWindow;
 	return {
 		source: source,
@@ -43,7 +42,7 @@ describe('superagent-d2l-cors-proxy', function() {
 			'/foo.ca'
 		].forEach(function(url) {
 			it('should fail with no protocol: ' + url, function() {
-				var host = proxy._tryGetHost(url);
+				var host = corsProxy._tryGetHost(url);
 				expect(host).to.be.null;
 			});
 		});
@@ -56,7 +55,7 @@ describe('superagent-d2l-cors-proxy', function() {
 				'host.com/foo/bar.json'
 			].forEach(function(url) {
 				it('should return the host: ' + protocol + url, function() {
-					var host = proxy._tryGetHost(protocol + url);
+					var host = corsProxy._tryGetHost(protocol + url);
 					expect(host).to.equal(protocol + 'host.com');
 				});
 			});
@@ -67,7 +66,7 @@ describe('superagent-d2l-cors-proxy', function() {
 	describe('getProxyFilePath', function() {
 
 		it('should return correct path', function() {
-			var filePath = proxy.getProxyFilePath();
+			var filePath = corsProxy.getProxyFilePath();
 			expect(filePath).to.equal(
 				require('path').join(__dirname, '../', 'index.html')
 			);
@@ -78,7 +77,7 @@ describe('superagent-d2l-cors-proxy', function() {
 	describe('getProxyDefaultLocation', function() {
 
 		it('should return correct location', function() {
-			var location = proxy.getProxyDefaultLocation();
+			var location = corsProxy.getProxyDefaultLocation();
 			expect(location).to.be.defined;
 		});
 
@@ -87,10 +86,11 @@ describe('superagent-d2l-cors-proxy', function() {
 	describe('proxy', function() {
 
 		var addEventListenerSpy,
-			corsProxy,
 			createElementSpy,
 			onMessage,
-			postMessageSpy;
+			postMessageSpy,
+			removeChildSpy,
+			removeEventListenerSpy;
 
 		function sendReady() {
 			onMessage(
@@ -103,6 +103,10 @@ describe('superagent-d2l-cors-proxy', function() {
 			nock('https://s.brightspace.com')
 				.get('/test/test.txt')
 				.reply(200, {success: true});
+
+			nock('http://localhost')
+				.get('/foo')
+				.reply(200, {foo: 'bar'});
 
 			var iframe = null;
 			global.document = {
@@ -121,12 +125,17 @@ describe('superagent-d2l-cors-proxy', function() {
 			global.window = {
 				addEventListener: function(type, handler) {
 					onMessage = handler;
-				}
+				},
+				removeEventListener: function() {}
 			};
 
 			addEventListenerSpy = sinon.spy(
 				global.window,
 				'addEventListener'
+			);
+			removeEventListenerSpy = sinon.spy(
+				global.window,
+				'removeEventListener'
 			);
 			createElementSpy = sinon.spy(
 				global.document,
@@ -136,37 +145,33 @@ describe('superagent-d2l-cors-proxy', function() {
 				iframeStub.contentWindow,
 				'postMessage'
 			);
+			removeChildSpy = sinon.spy(
+				iframeStub.parentNode,
+				'removeChild'
+			);
 
 		});
 
 		afterEach(function() {
 			iframeStub.contentWindow.postMessage.restore();
+			iframeStub.parentNode.removeChild.restore();
 		});
 
 		describe('CORS support', function() {
 
 			beforeEach(function() {
 				global.XMLHttpRequest = MockXmlHttpRequest;
-				corsProxy = proxy(superagent);
 			});
 
 			it('should not add a message event listener', function() {
+				superagent.get(cdnFile).use(corsProxy).end();
 				expect(addEventListenerSpy.called).to.be.false;
 				expect(onMessage).to.be.undefined;
 			});
 
-			it('should not overwrite superagent Request.end', function() {
-				expect(superagent.Request.prototype.end).to.equal(end);
-			});
-
 			it('should not create an IFRAME', function() {
+				superagent.get(cdnFile).use(corsProxy).end();
 				expect(createElementSpy.called).to.be.false;
-			});
-
-			it('should return req without _d2lCorsProxy', function() {
-				var req = {};
-				var res = corsProxy(req);
-				expect(res._d2lCorsProxy).to.be.undefined;
 			});
 
 			it('should make a normal request without IFRAME', function(done) {
@@ -176,7 +181,6 @@ describe('superagent-d2l-cors-proxy', function() {
 					.end(function(err,res) {
 						expect(addEventListenerSpy.called).to.be.false;
 						expect(createElementSpy.called).to.be.false;
-						expect(superagent.Request.prototype.end).to.equal(end);
 						expect(res.body.success).to.be.true;
 						done();
 					});
@@ -188,19 +192,13 @@ describe('superagent-d2l-cors-proxy', function() {
 
 			beforeEach(function() {
 				global.XMLHttpRequest = MockIEXmlHttpRequest;
-				corsProxy = proxy(superagent);
 			});
 
 			it('should add a message event listener', function() {
+				superagent.get(cdnFile).use(corsProxy).end();
 				expect(addEventListenerSpy.calledWith('message'))
 					.to.be.true;
 				expect(onMessage).to.be.defined;
-			});
-
-			it('should return req with _d2lCorsProxy', function() {
-				var req = {};
-				var res = corsProxy(req);
-				expect(res._d2lCorsProxy).to.be.true;
 			});
 
 			it('should wait to send until "ready" event', function() {
@@ -221,46 +219,53 @@ describe('superagent-d2l-cors-proxy', function() {
 				sendReady();
 				onMessage(
 					createMessage({
-						id: lastId,
 						res: { body: {foo: 'bar' } }
 					})
 				);
 			});
 
-			it('should not create multiple IFRAMEs', function() {
+			it('should remove IFRAME after delivery', function() {
 				superagent.get(cdnFile).use(corsProxy).end();
+				sendReady();
+				onMessage(createMessage());
+				expect(removeChildSpy.calledOnce).to.be.true;
+			});
+
+			it('should remove event listener after delivery', function() {
 				superagent.get(cdnFile).use(corsProxy).end();
-				expect(createElementSpy.calledOnce).to.be.true;
+				sendReady();
+				onMessage(createMessage());
+				expect(
+					removeEventListenerSpy.calledWith('message', onMessage)
+				).to.be.true;
 			});
 
 			it('should not handle events from other windows', function() {
 				var spy = sinon.spy();
 				superagent.get(cdnFile).use(corsProxy).end(spy);
 				sendReady();
-				onMessage(createMessage({ id: lastId }, 'foo' ));
+				onMessage(createMessage({},'foo'));
 				expect(spy.called).to.be.false;
 			});
 
 			it('should not break if no callback specified', function() {
 				superagent.get(cdnFile).use(corsProxy).end();
 				sendReady();
-				onMessage(createMessage({ id: lastId }));
+				onMessage(createMessage());
 				expect(postMessageSpy.calledOnce).to.be.true;
-			});
-
-			it('should not handle events multiple times', function() {
-				var spy = sinon.spy();
-				superagent.get(cdnFile).use(corsProxy).end(spy);
-				sendReady();
-				onMessage(createMessage({ id: lastId } ));
-				onMessage(createMessage({ id: lastId } ));
-				expect(spy.calledOnce).to.be.true;
 			});
 
 			it('should not intercept requests without "use" call', function(done) {
 				superagent.get(cdnFile).end(function(err, res) {
 					expect(res.body.success).to.be.true;
 					done();
+				});
+			});
+
+			it('should not attach if host invalid', function(done) {
+				superagent.get('/foo').use(corsProxy).end(function(err, res) {
+					expect(res.body.foo).to.equal('bar');
+					done(err);
 				});
 			});
 
