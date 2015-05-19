@@ -7,9 +7,7 @@ function tryGetHost(url) {
 	url = url || '';
 
 	var host = url;
-	if(url.indexOf('//') === 0) {
-		host = url.substr(2);
-	} else if(url.indexOf('http://') === 0) {
+	if(url.indexOf('http://') === 0) {
 		host = url.substr(7);
 	} else if(url.indexOf('https://') ===0) {
 		host = url.substr(8);
@@ -82,7 +80,7 @@ module.exports = function(req) {
 		}
 		iframe.contentWindow.postMessage(
 			JSON.stringify(msg),
-			'*'
+			host
 		);
 	}
 
