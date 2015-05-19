@@ -3,7 +3,6 @@ node_js:
 - '0.12'
 after_success:
 - npm run report-coverage
-- '[ "$TRAVIS_TAG" != "" ] && npm run publish'
 deploy:
   provider: npm
   email: d2ltravisdeploy@d2l.com
