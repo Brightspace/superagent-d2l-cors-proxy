@@ -179,7 +179,7 @@ describe('superagent-d2l-cors-proxy', function() {
 				superagent
 					.get(cdnFile)
 					.use(corsProxy)
-					.end(function(err,res) {
+					.end(function(err, res) {
 						expect(addEventListenerSpy.called).to.be.false;
 						expect(createElementSpy.called).to.be.false;
 						expect(res.body.success).to.be.true;
@@ -213,7 +213,7 @@ describe('superagent-d2l-cors-proxy', function() {
 				superagent
 					.get(cdnFile)
 					.use(corsProxy)
-					.end(function(err,res) {
+					.end(function(err, res) {
 						expect(res.body.foo).to.equal('bar');
 						done();
 					});
@@ -245,7 +245,7 @@ describe('superagent-d2l-cors-proxy', function() {
 				var spy = sinon.spy();
 				superagent.get(cdnFile).use(corsProxy).end(spy);
 				sendReady();
-				onMessage(createMessage({},'foo'));
+				onMessage(createMessage({}, 'foo'));
 				expect(spy.called).to.be.false;
 			});
 
