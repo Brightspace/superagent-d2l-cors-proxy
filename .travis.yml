@@ -3,6 +3,7 @@ node_js:
 - '0.12'
 after_success:
 - npm run report-coverage
+- '[ "$TRAVIS_SECURE_ENV_VARS" = "true" ] && [ "x$TRAVIS_TAG" != "x" ] && npm run publish:cdn'
 deploy:
   provider: npm
   email: d2ltravisdeploy@d2l.com
