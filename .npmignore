@@ -3,5 +3,5 @@ coverage
 test
 .editorconfig
 .gitignore
-.jshintrc
+.eslintrc
 .travis.yml
