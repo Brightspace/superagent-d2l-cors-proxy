@@ -7,9 +7,21 @@
 		<script src="https://s.brightspace.com/lib/superagent/1.2.0/superagent.min.js"></script>
 		<script>
 
+			function makeUrlLocal(url) {
+
+				var url = url.replace(/^[a-zA-Z]+:/, '');
+				url = url.replace(/^\/\/[^\/]+/, '');
+				url = url.replace(/^\//, '');
+
+				var localUrl = window.location.protocol + '//' + window.location.host + '/' + url;
+				return localUrl;
+
+			}
+
 			window.addEventListener('message', function(evt) {
 				var data = JSON.parse(evt.data);
-				superagent(data.method, data.url)
+				var localUrl = makeUrlLocal(data.url);
+				superagent(data.method, localUrl)
 					.query(data.query)
 					.timeout(data.timeout)
 					.send(data.data)
