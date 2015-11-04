@@ -7,18 +7,18 @@ function tryGetHost(url) {
 	url = url || '';
 
 	var host = url;
-	if(url.indexOf('http://') === 0) {
+	if (url.indexOf('http://') === 0) {
 		host = url.substr(7);
-	} else if(url.indexOf('https://') ===0) {
+	} else if (url.indexOf('https://') === 0) {
 		host = url.substr(8);
 	} else {
 		return null;
 	}
 
-	var scheme = url.substr(0,(url.length-host.length));
+	var scheme = url.substr(0, (url.length - host.length));
 
 	var index = host.indexOf('/');
-	if(index > -1) {
+	if (index > -1) {
 		host = host.substr(0, index);
 	}
 
@@ -40,12 +40,12 @@ module.exports = function(req) {
 	// http://stackoverflow.com/questions/1641507/detect-browser-support-for-cross-domain-xmlhttprequests
 	// https://hacks.mozilla.org/2009/07/cross-site-xmlhttprequest-with-cors/
 	var supportsCors = 'withCredentials' in new XMLHttpRequest();
-	if(supportsCors) {
+	if (supportsCors) {
 		return req;
 	}
 
 	var host = tryGetHost(req.url);
-	if(!host) {
+	if (!host) {
 		return req;
 	}
 
@@ -56,13 +56,13 @@ module.exports = function(req) {
 
 	function onMessage(evt) {
 
-		if(!iframe || evt.source !== iframe.contentWindow) {
+		if (!iframe || evt.source !== iframe.contentWindow) {
 			return;
 		}
 
 		var data = JSON.parse(evt.data);
 
-		if(data.type === 'ready') {
+		if (data.type === 'ready') {
 			ready = true;
 			send();
 			return;
@@ -75,7 +75,7 @@ module.exports = function(req) {
 	}
 
 	function send() {
-		if(!ready) {
+		if (!ready) {
 			return;
 		}
 		iframe.contentWindow.postMessage(
@@ -90,7 +90,7 @@ module.exports = function(req) {
 
 		iframe = buildFrame(host);
 
-		callback = fn || function(){};
+		callback = fn || function() {};
 
 		msg = {
 			method: this.method,
