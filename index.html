@@ -22,7 +22,7 @@
 				var data = JSON.parse(evt.data);
 				var localUrl = makeUrlLocal(data.url);
 				superagent(data.method, localUrl)
-					.query(data.query)
+					.query(data.query && data.query.join('&'))
 					.timeout(data.timeout)
 					.send(data.data)
 					.set(data.header)
