@@ -43,7 +43,7 @@
   "devDependencies": {
     "chai": "^2.3.0",
     "coveralls": "^2.11.2",
-    "eslint": "^1.8.0",
+    "eslint": "^7.4.0",
     "eslint-config-brightspace": "0.0.3",
     "eslint-plugin-react": "^3.6.3",
     "frau-publisher": "^2.5.2",
