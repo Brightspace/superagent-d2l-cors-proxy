@@ -52,6 +52,6 @@
     "nock": "^2.0.1",
     "peanut-gallery": "^1.1.1",
     "sinon": "^1.14.1",
-    "superagent": "^1.2.0"
+    "superagent": "^5.3.1"
   }
 }
