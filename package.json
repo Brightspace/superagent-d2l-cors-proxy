@@ -7,7 +7,7 @@
     "lint": "npm run lint:src && npm run lint:test",
     "lint:src": "eslint index.js",
     "lint:test": "eslint test",
-    "publish:cdn": "frau-publisher | peanut-gallery",
+    "publish:cdn": "frau-publisher",
     "test:unit": "istanbul cover _mocha test/*.js -- -R spec",
     "test": "npm run lint && npm run test:unit",
     "report-coverage": "coveralls < ./coverage/lcov.info"
@@ -50,7 +50,6 @@
     "istanbul": "^0.3.13",
     "mocha": "^2.2.4",
     "nock": "^2.0.1",
-    "peanut-gallery": "^1.1.1",
     "sinon": "^1.14.1",
     "superagent": "^1.2.0"
   }
